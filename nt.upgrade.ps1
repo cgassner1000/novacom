@@ -39,6 +39,7 @@ function HandleLogFiles {
     }
 }
 
+
 # Überprüfen, ob die Dateien im Quellordner vorhanden sind
 if (Test-Path -Path "$sourcePath\nt.payment*.zip") {
     $paymentZIPvorhanden = $true
