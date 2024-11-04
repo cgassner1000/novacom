@@ -22,6 +22,6 @@
    - Wenn einige Hostnamen aufgrund von Unerreichbarkeit nicht aktualisiert werden können, wird eine neue Datei namens `failedhost.txt` erstellt. Diese Datei enthält eine Liste aller Hostnamen, bei denen das Update fehlgeschlagen ist.
 
 ## Beispiel für `hostname.txt`
-hostname1
-hostname2
-hostname3
+hostname1  
+hostname2  
+hostname3  
