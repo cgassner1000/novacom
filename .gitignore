@@ -2,3 +2,5 @@ Transscript.log
 failedhost.txt
 hostname.txt
 upgrade.log
+nt.update/CheckVersion.txt
+nt.update/CheckVersion.csv
