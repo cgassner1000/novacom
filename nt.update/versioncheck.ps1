@@ -1,4 +1,5 @@
 $hostnameList = Get-Content -Path "$PSScriptRoot\hostname.txt"
+$credential = Get-Credential  # Anmeldeinformationen abfragen
 $expectedVersion = Read-Host "Erwartete Fiskal/Payment Version (zb. 2024.3.9064)"
 $sessions = @()
 $failedHosts = @()
@@ -7,12 +8,6 @@ $results = @()
 if ($expectedVersion -eq "") {
     $expectedVersion = "2024.4.9074"
 }
-
-# Anmeldeinformationen festlegen
-$Username = "admin.nvc"
-$Password = 'n0V60$01nc' | ConvertTo-SecureString -AsPlainText -Force
-$credential = New-Object System.Management.Automation.PSCredential ($Username, $Password)
-#
 
 # Session erstellen
 foreach ($hostname in $hostnameList) {
