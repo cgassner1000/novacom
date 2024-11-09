@@ -1,7 +1,7 @@
 # Hostnamen aus der Textdatei "hostlist.txt" laden
 $hostnameList = Get-Content -Path "$PSScriptRoot\hostname.txt"
-#$credential = Get-Credential  # Anmeldeinformationen abfragen
-$sourcePath = "\\10.10.16.239\c$\install\novacom\2024.3\2024.3.9064\Nt.Services\*"  # Pfad zum Quellordner auf dem Server
+$credential = Get-Credential  # Anmeldeinformationen abfragen
+#$sourcePath = "\\10.10.16.239\c$\install\novacom\2024.3\2024.3.9064\Nt.Services\*"  # Pfad zum Quellordner auf dem Server
 $sourcePath = "\\10.1.80.11\c$\nc-install\Nt.Services\"
 $destinationPath = "C$\install"
 $localInstallPath = "C:\install"
@@ -50,9 +50,9 @@ if (Test-Path -Path "$sourcePath\nt.fiscal*.zip") {
 
 
 # Anmeldeinformationen festlegen
- $Username = "admin.nvc"
- $Password = 'n0V60$01nc' | ConvertTo-SecureString -AsPlainText -Force
- $credential = New-Object System.Management.Automation.PSCredential ($Username, $Password)
+# $Username = "admin.nvc"
+# $Password = 'n0V60$01nc' | ConvertTo-SecureString -AsPlainText -Force
+# $credential = New-Object System.Management.Automation.PSCredential ($Username, $Password)
 #
 
 $sessions = @()
@@ -100,24 +100,24 @@ Invoke-Command -Session $sessions -ScriptBlock {
 
 
 #################################################### Zip übertragen START
-$hostnameList | ForEach-Object -Parallel {
-    $client = $_
-    Write-Output "Verbinde zu: $client"
-     try {
-        # Netzlaufwerk verbinden und Anmeldedaten angeben
-        New-PSDrive -Name "RemoteDrive" -PSProvider FileSystem -Root "\\$client\$using:destinationPath" -Credential $using:credential -ErrorAction Stop
-
-        # Dateien auf das verbundene Netzlaufwerk kopieren
-        Copy-Item -Path "$using:sourcePath\*" -Destination "RemoteDrive:\" -Force -Recurse
-        Write-Output $client": Dateien kopiert"
-        
-        # Netzlaufwerk entfernen
-        Remove-PSDrive -Name "RemoteDrive"
-    } catch {
-        Write-Output "Fehler beim Verbinden oder Kopieren auf $client : $_"
-        $failedHosts += $client
-    }
-}
+#$hostnameList | ForEach-Object -Parallel {
+#    $client = $_
+#    Write-Output "Verbinde zu: $client"
+#     try {
+#        # Netzlaufwerk verbinden und Anmeldedaten angeben
+#        New-PSDrive -Name "RemoteDrive" -PSProvider FileSystem -Root "\\$client\$using:destinationPath" -Credential $using:credential -ErrorAction Stop
+#
+#        # Dateien auf das verbundene Netzlaufwerk kopieren
+#        Copy-Item -Path "$using:sourcePath\*" -Destination "RemoteDrive:\" -Force -Recurse
+#        Write-Output $client": Dateien kopiert"
+#        
+#        # Netzlaufwerk entfernen
+#        Remove-PSDrive -Name "RemoteDrive"
+#    } catch {
+#        Write-Output "Fehler beim Verbinden oder Kopieren auf $client : $_"
+#        $failedHosts += $client
+#    }
+#}
 #################################################### Zip übertragen END
 
 ################################################### STOP,KILL,UPDATE SERVICE START
@@ -182,9 +182,9 @@ $jobs | Remove-Job
             if ($paymentZIPvorhanden) {
                 if ($paymentDienste.Name -contains $ntService.Name) {
                     $paymentPath = Split-Path -Path ((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($ntService.Name)" -Name "ImagePath").ImagePath) #-replace '\"(.*?)\".*', '$1' -replace '(.*?) .*', '$1')
-                    Write-Host $hostName": PAYMENT Entferne "$($ntService.Name)
-                    Write-Host $hostName": PAYMENT Path: "$paymentPath
-                    Remove-Item -Path "$paymentPath\*" -Recurse -Force
+                    #Write-Host $hostName": PAYMENT Entferne "$($ntService.Name)
+                    #Write-Host $hostName": PAYMENT Path: "$paymentPath
+                    #Remove-Item -Path "$paymentPath\*" -Recurse -Force
                     Write-Host $hostName": PAYMENT Entpacke "$($ntService.Name)
                     Get-ChildItem -Path "$localInstallPath" -Filter "nt.payment*.zip" | ForEach-Object {
                         $zipFilePath = $_.FullName
@@ -195,11 +195,11 @@ $jobs | Remove-Job
             if ($fiskalZIPvorhanden) {
                 if ($fiskalDienste.Name -contains $ntService.Name) {
                     $fiskalPath = Split-Path -Path ((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$($ntService.Name)" -Name "ImagePath").ImagePath) #-replace '\"(.*?)\".*', '$1' -replace '(.*?) .*', '$1')
-                    Write-Host $hostName": FISKAL Entferne "$($ntService.Name)
-                    Write-Host $hostName": FISKAL Path: "$fiskalPath
-                    Remove-Item -Path "$fiskalPath\*" -Recurse -Force
+                    #Write-Host $hostName": FISKAL Entferne "$($ntService.Name)
+                    #Write-Host $hostName": FISKAL Path: "$fiskalPath
+                    #Remove-Item -Path "$fiskalPath\*" -Recurse -Force
                     Write-Host $hostName": FISKAL Entpacke "$($ntService.Name)
-                    Get-ChildItem -Path "$localInstallPath" -Filter "nt.fiscal*.zip" | ForEach-Object {                 #ändern für lutz! "$localInstallPath\Nt.Services\"
+                    Get-ChildItem -Path "$localInstallPath" -Filter "nt.fiscal*.zip" | ForEach-Object {                
                         $zipFilePath = $_.FullName
                         Expand-Archive -Path $zipFilePath -DestinationPath $fiskalPath -Force
                     }
