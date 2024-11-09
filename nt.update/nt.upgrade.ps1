@@ -1,8 +1,8 @@
 # Hostnamen aus der Textdatei "hostlist.txt" laden
 $hostnameList = Get-Content -Path "$PSScriptRoot\hostname.txt"
 $credential = Get-Credential  # Anmeldeinformationen abfragen
-#$sourcePath = "\\10.10.16.239\c$\install\novacom\2024.3\2024.3.9064\Nt.Services\*"  # Pfad zum Quellordner auf dem Server
-$sourcePath = "\\10.1.80.11\c$\nc-install\Nt.Services\"
+$sourcePath = "\\10.10.16.239\c$\install\novacom\2024.3\2024.3.9064\Nt.Services\*"  # Pfad zum Quellordner auf dem Server
+#$sourcePath = "\\10.1.80.11\c$\nc-install\Nt.Services\"
 #$destinationPath = "C$\install"
 $localInstallPath = "C:\install"
 $paymentZIPvorhanden = $false
@@ -48,12 +48,6 @@ if (Test-Path -Path "$sourcePath\nt.fiscal*.zip") {
     $fiskalZIPvorhanden = $true
 }
 
-
-# Anmeldeinformationen festlegen
-# $Username = "admin.nvc"
-# $Password = 'n0V60$01nc' | ConvertTo-SecureString -AsPlainText -Force
-# $credential = New-Object System.Management.Automation.PSCredential ($Username, $Password)
-#
 
 $sessions = @()
 $failedHosts = @()
