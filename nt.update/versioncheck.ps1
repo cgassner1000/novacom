@@ -88,12 +88,16 @@ $commandResults = Invoke-Command -Session $sessions -ScriptBlock {
 
 
     # Status festlegen
-    $status = if ($paymentVersion -eq $expectedVersion -and $fiscalVersion -eq $expectedVersion -and $posVersion -eq $expectedVersion) { 
-        "OK" 
-    } elseif ($paymentVersion -ne $expectedVersion -or $fiscalVersion -ne $expectedVersion -or $posVersion -ne $expectedVersion) {
-        "MISSMATCH"
+    $status = if (
+        (($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion) -and $posVersion -eq $expectedVersion) -or 
+        ($paymentVersion -eq $expectedVersion -and $fiscalVersion -eq $expectedVersion -and $posVersion -eq $expectedVersion) -or
+        ($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion -or $posVersion -eq $expectedVersion)
+    ) {
+        "OK"
+    } elseif ($paymentVersion -eq $null -and $fiscalVersion -eq $null -and $posVersion -eq $null) {
+        "ERROR"  # Alle Versionen sind leer
     } else {
-        "ERROR"
+        "MISSMATCH"  # Alle anderen Fälle
     }
 
     # Ergebnis als Objekt zurückgeben
