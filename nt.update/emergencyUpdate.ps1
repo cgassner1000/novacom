@@ -1,5 +1,5 @@
 # Hostnamen aus der Textdatei "hostlist.txt" laden
-$hostnameList = Get-Content -Path "$PSScriptRoot\hostname.txt"
+$hostnameList = Get-Content -Path "$PSScriptRoot\hostname_em.txt"
 $credential = Get-Credential  # Anmeldeinformationen abfragen
 
 $localInstallPath = "C:\install"
@@ -29,7 +29,6 @@ if ($failedHosts.Count -gt 0) {
 }
 
 Invoke-Command -Session $sessions -ScriptBlock {
-    param ($sourcePath, $localInstallPath)
     $hostName = $env:COMPUTERNAME
 
     try {
