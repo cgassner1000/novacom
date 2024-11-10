@@ -6,7 +6,7 @@ $failedHosts = @()
 $results = @()
 
 if ($expectedVersion -eq "") {
-    $expectedVersion = "2024.4.9074"
+    $expectedVersion = "2024.4.9064"
 }
 
 # Session erstellen
