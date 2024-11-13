@@ -6,7 +6,7 @@ $failedHosts = @()
 $results = @()
 
 if ($expectedVersion -eq "") {
-    $expectedVersion = "2024.4.9064"
+    $expectedVersion = "2024.3.9064"
 }
 
 # Session erstellen
@@ -25,6 +25,7 @@ foreach ($hostname in $hostnameList) {
             NtPayment = ""
             NtFiscal = ""
             NtPOS = ""
+            NtControl = ""
             Status = "ERROR"
         }
     }
@@ -53,6 +54,7 @@ $commandResults = Invoke-Command -Session $sessions -ScriptBlock {
     $paymentVersion = ""
     $fiscalVersion = ""
     $posVersion = ""
+    $controlVersion = ""
 
     foreach ($ntService in $alleNtDienste) {
         try {
@@ -73,28 +75,40 @@ $commandResults = Invoke-Command -Session $sessions -ScriptBlock {
         }
     }
 
-        # Abruf der Version von NovaTouch POS aus den installierten Programmen
-        try {
-            $posProgram = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like "NovaTouch POS" }
-            if ($posProgram) {
-                $posVersion = $posProgram.Version
-            } else {
-                $posVersion = "Nicht installiert"
-            }
-        } catch {
-            Write-Host "Fehler beim Abrufen der Version für NovaTouch POS: $_"
-            $posVersion = "Unbekannt"
+    # Abruf der Version von NovaTouch POS aus den installierten Programmen
+    try {
+        $posProgram = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like "NovaTouch POS" }
+        if ($posProgram) {
+            $posVersion = $posProgram.Version
+        } else {
+            $posVersion = "Nicht installiert"
         }
+    } catch {
+        Write-Host "Fehler beim Abrufen der Version für NovaTouch POS: $_"
+        $posVersion = "Unbekannt"
+    }
 
+    # Abruf der Version von NovaTouch Control aus den installierten Programmen
+    try {
+        $controlProgram = Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like "NovaTouch Control" }
+        if ($controlProgram) {
+            $controlVersion = $controlProgram.Version
+        } else {
+            $controlVersion = "Nicht installiert"
+        }
+    } catch {
+        Write-Host "Fehler beim Abrufen der Version für NovaTouch Control: $_"
+        $controlVersion = "Unbekannt"
+    }
 
     # Status festlegen
     $status = if (
-        (($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion) -and $posVersion -eq $expectedVersion) -or 
-        ($paymentVersion -eq $expectedVersion -and $fiscalVersion -eq $expectedVersion -and $posVersion -eq $expectedVersion) -or
-        ($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion -or $posVersion -eq $expectedVersion)
+        (($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion) -and $posVersion -eq $expectedVersion -and $controlVersion -eq $expectedVersion) -or 
+        ($paymentVersion -eq $expectedVersion -and $fiscalVersion -eq $expectedVersion -and $posVersion -eq $expectedVersion -and $controlVersion -eq $expectedVersion) -or
+        ($paymentVersion -eq $expectedVersion -or $fiscalVersion -eq $expectedVersion -or $posVersion -eq $expectedVersion -or $controlVersion -eq $expectedVersion)
     ) {
         "OK"
-    } elseif ($paymentVersion -eq $null -and $fiscalVersion -eq $null -and $posVersion -eq $null) {
+    } elseif ($paymentVersion -eq $null -and $fiscalVersion -eq $null -and $posVersion -eq $null -and $controlVersion -eq $null) {
         "ERROR"  # Alle Versionen sind leer
     } else {
         "MISSMATCH"  # Alle anderen Fälle
@@ -106,6 +120,7 @@ $commandResults = Invoke-Command -Session $sessions -ScriptBlock {
         NtPayment = $paymentVersion
         NtFiscal = $fiscalVersion
         NtPOS = $posVersion
+        NtControl = $controlVersion
         Status = $status
     }
 } -ArgumentList $expectedVersion
@@ -117,7 +132,6 @@ $results += $commandResults
 $results | Format-Table -AutoSize
 $results | Format-Table -AutoSize | Out-File -FilePath "$PSScriptRoot\CheckVersion.txt"
 $results | Export-Csv -Path "$PSScriptRoot\CheckVersion.csv" -NoTypeInformation -Encoding UTF8
-
 
 Write-Host "INFO: Die CheckVersion-Ergebnisse wurden in 'CheckVersion.txt' und 'CheckVersion.csv' gespeichert."
 
